@@ -32,9 +32,17 @@ if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 
 PACKAGE_FILE="jlog-${TAG#v}.tgz"
+CHECKSUMS_FILE="SHA256SUMS"
 curl -fsSL \
   -o "$PACKAGE_FILE" \
   "https://github.com/$REPO/releases/download/$TAG/$PACKAGE_FILE"
+curl -fsSL \
+  -o "$CHECKSUMS_FILE" \
+  "https://github.com/$REPO/releases/download/$TAG/$CHECKSUMS_FILE"
+if ! grep "$PACKAGE_FILE" "$CHECKSUMS_FILE" | shasum -a 256 -c --status; then
+  echo "Checksum verification failed. The downloaded package may be corrupted or tampered." >&2
+  exit 1
+fi
 
 npm install -g "./$PACKAGE_FILE"
 
