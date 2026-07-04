@@ -152,6 +152,25 @@ jlog update
 
 คำสั่งจะขอให้พิมพ์ `yes` ก่อนติดตั้ง update
 
+## ถอนการติดตั้ง
+
+ถอนเฉพาะตัวโปรแกรม โดยเก็บ configuration, browser session และ audit exports
+ไว้สำหรับการติดตั้งครั้งถัดไป:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/jlog-releases/main/uninstall.sh | sh
+```
+
+ถ้าต้องการถอนแบบ clean รวมข้อมูลทั้งหมดของ `jlog`:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/jlog-releases/main/uninstall.sh | sh -s -- --purge
+```
+
+โหมด `--purge` จะแสดง path ที่กำลังจะลบและให้พิมพ์ `yes` ก่อนดำเนินการ
+การลบนี้ถาวรและรวม Jira token, Kawari browser session, sync state และ audit
+exports แต่จะไม่ลบ Playwright browser cache ที่อาจใช้งานร่วมกับโปรเจกต์อื่น
+
 ## แก้ปัญหาที่พบบ่อย
 
 ### Setup ไม่สำเร็จ หรือ configuration ไม่ถูกต้อง
