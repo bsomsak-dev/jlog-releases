@@ -1,0 +1,17 @@
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+
+# Local configuration and sensitive data
+.env
+.env.*
+!.env.example
+.jlog/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+.obsidian/
+*.swp
