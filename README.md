@@ -7,7 +7,6 @@
 
 - macOS
 - Node.js 22 ขึ้นไป พร้อม `npm`
-- [GitHub CLI (`gh`)](https://cli.github.com/) ที่ล็อกอินแล้ว
 - บัญชีที่เข้าใช้ Kawari timesheet ได้
 - Jira Cloud email และ [Jira API token](https://id.atlassian.com/manage-profile/security/api-tokens)
 
@@ -16,7 +15,6 @@
 ```sh
 node --version
 npm --version
-gh auth status
 ```
 
 ## ติดตั้ง

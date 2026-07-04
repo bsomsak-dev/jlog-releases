@@ -12,9 +12,31 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 cd "$TMP_DIR"
 
-gh release download --repo "$REPO" --pattern "*.tgz"
+TAG="$(
+  curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" |
+    node -e '
+      let input = "";
+      process.stdin.setEncoding("utf8");
+      process.stdin.on("data", (chunk) => { input += chunk; });
+      process.stdin.on("end", () => {
+        const release = JSON.parse(input);
+        if (typeof release.tag_name !== "string") process.exit(1);
+        process.stdout.write(release.tag_name);
+      });
+    '
+)"
 
-npm install -g ./*.tgz
+if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "Could not determine the latest stable jlog release." >&2
+  exit 1
+fi
+
+PACKAGE_FILE="jlog-${TAG#v}.tgz"
+curl -fsSL \
+  -o "$PACKAGE_FILE" \
+  "https://github.com/$REPO/releases/download/$TAG/$PACKAGE_FILE"
+
+npm install -g "./$PACKAGE_FILE"
 
 JLOG_PACKAGE_DIR="$(npm root -g)/jlog"
 PLAYWRIGHT_BIN="$JLOG_PACKAGE_DIR/node_modules/.bin/playwright"
