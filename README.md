@@ -1,229 +1,134 @@
-# jlog releases
+# jlog
 
-`jlog` เป็น CLI สำหรับนำเวลาจาก Kawari ไปสร้าง Jira Worklog โดยให้ตรวจสอบ
-รายการและยืนยันก่อนเขียนข้อมูลจริง
+CLI สำหรับนำเวลาจาก Kawari ไปสร้าง Jira Worklog
 
-## สิ่งที่ต้องมีก่อนติดตั้ง
+## ติดตั้ง
 
-- macOS
-- Node.js 22 ขึ้นไป พร้อม `npm`
-- บัญชีที่เข้าใช้ Kawari timesheet ได้
-- Jira Cloud email และ [Jira API token](https://id.atlassian.com/manage-profile/security/api-tokens)
-
-ตรวจสอบเครื่องมือที่จำเป็นได้ด้วย:
+ต้องมี macOS, Node.js 22+, npm และ [Jira Cloud API token](https://id.atlassian.com/manage-profile/security/api-tokens)
 
 ```sh
 node --version
 npm --version
 ```
 
-## ติดตั้ง
-
 ```sh
 curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/jlog-releases/main/install.sh | sh
 ```
 
-ตัวติดตั้งจะดาวน์โหลด `jlog` และ Playwright Chromium ที่ตรงกับ release
-จากนั้นจะเปิด setup wizard ถ้ายังไม่มี configuration ที่ใช้งานได้
-
-ถ้า setup wizard ไม่เปิด หรือปิดไปก่อนตั้งค่าเสร็จ ให้รัน:
+ตัวติดตั้งดาวน์โหลด `jlog` และ Playwright Chromium จากนั้นเปิด setup wizard
+ถ้าปิดก่อนตั้งค่าเสร็จ รันใหม่:
 
 ```sh
 jlog setup
 ```
 
-เตรียมข้อมูลต่อไปนี้สำหรับ setup:
+เตรียม 5 อย่าง:
 
 - **Jira base URL** — เฉพาะ origin เช่น `https://example.atlassian.net`
-  ไม่ใส่ path ของ project หรือ issue
-- **Jira email** — email ของบัญชี Jira
-- **Jira API token** — token ของบัญชีเดียวกับ email
+- **Jira email** — บัญชีเดียวกับ API token
+- **Jira API token**
 - **Kawari timesheet URL** — URL เต็มของหน้า timesheet
-- **Timezone** — ใช้ `Asia/Bangkok`
+- **Timezone** — `Asia/Bangkok`
 
-Configuration จะถูกเก็บที่ `~/.config/jlog/config.json` โดย Jira API token
-เก็บเป็น plain text ในไฟล์นี้ ควรใช้ `jlog` บนเครื่องส่วนตัวที่เชื่อถือได้เท่านั้น
+Configuration เก็บที่ `~/.config/jlog/config.json`
+API token เก็บเป็น plain text — ใช้บนเครื่องส่วนตัวที่เชื่อถือได้เท่านั้น
 
-## เริ่มใช้งานครั้งแรก
+## เริ่มใช้งาน
 
-### 1. ตรวจสอบความพร้อม
+### 1. ตรวจความพร้อม
 
 ```sh
 jlog doctor
 ```
 
-ควรเห็น `PASS` สำหรับ configuration, data directory, Jira authentication และ
-Playwright Chromium ถ้ามีรายการ `FAIL` ให้แก้ตามรายละเอียดที่แสดงก่อนทำขั้นตอนต่อไป
-
-ดู configuration ที่กำลังใช้งานได้ด้วยคำสั่งด้านล่าง โดย token จะถูกซ่อนเสมอ:
+ต้องเห็น `PASS` ทุกรายการ (config, Jira auth, Playwright Chromium)
 
 ```sh
 jlog config show
 ```
 
-### 2. เตรียมข้อมูลใน Kawari
+ดู configuration ที่ใช้อยู่ (token ถูกซ่อน)
 
-Timesheet Entry ที่ต้องการสร้างเป็น Jira Worklog ต้องมี Jira issue key
-เพียงหนึ่งตัวใน Description เช่น:
-
-```text
-PROJ-123 Implement login validation
-```
-
-- ไม่มี Jira key: รายการจะเป็น Unmapped Entry และถูกข้ามพร้อมคำเตือน
-- มี Jira key มากกว่าหนึ่งตัว: รายการไม่ถูกต้องและจะหยุดทั้ง Sync Batch
-
-### 3. Preview ก่อนเขียน Jira
+### 2. Sync (คำสั่งเดียว ครบทุกขั้นตอน)
 
 ```sh
-jlog preview
+jlog sync
 ```
 
-`preview` อ่านข้อมูลจาก Kawari และ Jira เพื่อแสดงรายการที่จะ `Create`, `Skip`,
-เตือน หรือพบ conflict โดยไม่เขียนข้อมูลลง Jira
+`sync` เป็น guided command — ทำงานทั้งหมดในครั้งเดียว:
 
-ครั้งแรก Playwright Chromium อาจเปิดหน้าต่างให้ล็อกอิน Kawari เมื่อเข้าสู่ระบบแล้ว
-ให้กลับมาดูผลลัพธ์ใน Terminal
+1. scrape ข้อมูลจาก Kawari timesheet
+2. แสดง preview ทั้งหมดที่จะสร้าง
+3. ถามยืนยัน `Create N worklog(s) totaling Xh?`
+4. สร้าง Jira worklog
+5. verify ผลอัตโนมัติ
 
-ถ้าไม่ระบุวันที่ `jlog` จะใช้วันจันทร์ถึงวันอาทิตย์ของสัปดาห์ปัจจุบันตาม
-`Asia/Bangkok`
-
-กำหนดช่วงวันที่เองได้ โดยต้องใส่ `--from` และ `--to` คู่กัน รูปแบบ
-`YYYY-MM-DD` และอยู่ภายในเดือนเดียวกัน:
-
-```sh
-jlog preview --from 2026-07-01 --to 2026-07-04
-```
-
-### 4. Sync ไปยัง Jira
-
-เมื่อผล preview ถูกต้องแล้ว ให้ใช้ช่วงวันที่เดียวกันกับที่ตรวจสอบ:
+ค่าเริ่มต้นคือเดือนปัจจุบัน (เวลา `Asia/Bangkok`)
+ระบุช่วงวันที่เองได้ ใช้รูปแบบ `YYYY-MM-DD` ต้องอยู่ภายในเดือนเดียวกัน:
 
 ```sh
 jlog sync --from 2026-07-01 --to 2026-07-04
 ```
 
-`sync` จะแสดง preview อีกครั้งก่อนเขียน Jira หากต้องการดำเนินการต่อ ต้องพิมพ์
-`yes` ตามข้อความยืนยัน:
+รันซ้ำจะข้ามรายการที่สร้างสำเร็จแล้ว ไม่มี duplicate
+ถ้า Jira issue ไม่มีอยู่จริง `jlog` จะให้ใส่ key ที่ถูกต้อง (เฉพาะ batch นี้ ไม่เปลี่ยน Kawari)
 
-```text
-Create 3 Jira worklog(s) totaling 12h? Type yes to continue: yes
-```
-
-คำตอบอื่นจะยกเลิกโดยไม่สร้าง Jira Worklog การรันคำสั่งเดิมซ้ำจะข้าม Worklog
-ที่ `jlog` สร้างสำเร็จแล้ว จึงไม่สร้างรายการซ้ำ
-
-### 5. ตรวจสอบผล
-
-`sync` จะตรวจสอบผลให้อัตโนมัติหลังเขียนเสร็จ และสามารถตรวจซ้ำภายหลังได้ด้วย:
+### คำสั่งอื่น ๆ
 
 ```sh
-jlog verify --from 2026-07-01 --to 2026-07-04
+jlog preview                              # ดู preview อย่างเดียว (ไม่อนุมัติ ไม่เขียน)
+jlog verify  --from 2026-07-01 --to 2026-07-04   # ตรวจผลทีหลัง
+
+jlog rollback --from 2026-07-01 --to 2026-07-04 --dry-run   # ดูก่อนลบ
+jlog rollback --from 2026-07-01 --to 2026-07-04             # ลบ worklog จริง
 ```
 
-`verify` เป็นคำสั่งแบบ read-only และไม่เขียนข้อมูลลง Jira
+Rollback ลบเฉพาะ worklog ที่ `jlog` สร้างไว้ และ restore เวลาเป็น Jira Remaining Estimate
+ถ้า entry ย้ายไป issue ใหม่ ให้ระบุของเดิมด้วย `--issue OLD-KEY`
 
-## คำสั่งที่ใช้บ่อย
+## คำสั่งทั้งหมด
 
-```text
+```
 jlog setup
 jlog config show
 jlog doctor
-jlog preview [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
-jlog sync    [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
-jlog verify  [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
+jlog sync     [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
+jlog preview  [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
+jlog verify   [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
+jlog rollback [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--issue KEY] [--dry-run]
 jlog update
 jlog --help
-jlog <command> --help
 ```
 
-เพิ่ม `--export csv` หรือ `--export json` เพื่อบันทึก audit export ไว้ที่
-`~/.local/share/jlog/audit-exports/` เช่น:
+เพิ่ม `--export csv` หรือ `--export json` เพื่อบันทึกไฟล์ไว้ที่ `~/.local/share/jlog/audit-exports/`
 
-```sh
-jlog preview --from 2026-07-01 --to 2026-07-04 --export csv
-```
-
-อัปเดตเป็น stable release ล่าสุด:
+## อัปเดต
 
 ```sh
 jlog update
 ```
 
-คำสั่งจะขอให้พิมพ์ `yes` ก่อนติดตั้ง update
+ตรวจสอบ release ล่าสุดจาก GitHub ยืนยัน checksum แล้วพิมพ์ `yes` เพื่อติดตั้ง
 
 ## ถอนการติดตั้ง
-
-ถอนเฉพาะตัวโปรแกรม โดยเก็บ configuration, browser session และ audit exports
-ไว้สำหรับการติดตั้งครั้งถัดไป:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/jlog-releases/main/uninstall.sh | sh
 ```
 
-ถ้าต้องการถอนแบบ clean รวมข้อมูลทั้งหมดของ `jlog`:
+ลบทั้งหมดรวม config, token, state:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/jlog-releases/main/uninstall.sh | sh -s -- --purge
 ```
 
-โหมด `--purge` จะแสดง path ที่กำลังจะลบและให้พิมพ์ `yes` ก่อนดำเนินการ
-การลบนี้ถาวรและรวม Jira token, Kawari browser session, sync state และ audit
-exports แต่จะไม่ลบ Playwright browser cache ที่อาจใช้งานร่วมกับโปรเจกต์อื่น
+## ปัญหาที่พบบ่อย
 
-## แก้ปัญหาที่พบบ่อย
-
-### Setup ไม่สำเร็จ หรือ configuration ไม่ถูกต้อง
-
-รัน setup ใหม่ แล้วตรวจสอบผล:
-
-```sh
-jlog setup
-jlog doctor
-```
-
-Jira base URL ต้องเป็น HTTPS origin เช่น `https://example.atlassian.net`
-และ Jira email ต้องเป็นบัญชีเดียวกับ API token
-
-### `jlog doctor` แสดง `FAIL`
-
-อ่านรายละเอียดต่อท้ายรายการที่ fail:
-
-- **Jira authentication** — ตรวจ Jira URL, email และ API token ด้วย `jlog setup`
-- **Config directory/file** — รัน `jlog setup` ใหม่เพื่อสร้างไฟล์และ permission
-  ที่ถูกต้อง
-- **Playwright Chromium** — ติดตั้ง `jlog` ใหม่ เพื่อให้ installer ดาวน์โหลด
-  Chromium ที่ตรงกับ release
-
-### เปิด Kawari ไม่ได้หรือ session หมดอายุ
-
-รัน `jlog preview` อีกครั้ง แล้วล็อกอินในหน้าต่าง Chromium ที่เปิดขึ้น
-Browser profile จะถูกเก็บไว้ที่ `~/.local/share/jlog/browser-profile/`
-
-### Error เรื่องช่วงวันที่
-
-- ต้องระบุ `--from` และ `--to` พร้อมกัน
-- ใช้รูปแบบ `YYYY-MM-DD`
-- วันที่เริ่มต้องไม่อยู่หลังวันที่สิ้นสุด
-- ช่วงวันที่ต้องอยู่ภายในเดือนเดียวกัน
-- ถ้าสัปดาห์ปัจจุบันคร่อมเดือน ต้องระบุช่วงวันที่เอง
-
-ตัวอย่าง:
-
-```sh
-jlog preview --from 2026-07-01 --to 2026-07-05
-```
-
-### รายการถูกข้ามหรือทั้ง batch ถูกหยุด
-
-- Description ไม่มี Jira key: รายการถูกข้ามเป็น Unmapped Entry
-- Description มีหลาย Jira key: แก้ให้เหลือเพียงหนึ่ง key
-- ข้อมูลวันที่ ระยะเวลา Project หรือ Description ไม่ถูกต้อง: แก้ใน Kawari
-  แล้วรัน `preview` ใหม่
-- Sync Conflict: ข้อมูลใน Kawari ต่างจาก Jira Worklog ที่เคย sync ต้องตรวจและ
-  แก้ข้อมูลต้นทางหรือ Worklog ให้ถูกต้องก่อนรันใหม่
-
-### Sync สร้าง Worklog สำเร็จเพียงบางรายการ
-
-แก้สาเหตุที่แสดงใน Terminal แล้วรัน `jlog sync` ด้วยช่วงวันที่เดิมอีกครั้ง
-รายการที่สร้างสำเร็จแล้วจะถูก `Skip` และ `jlog` จะลองสร้างเฉพาะรายการที่ยังขาด
+- **Setup ไม่สำเร็จ** — `jlog setup` → `jlog doctor`
+- **Jira auth FAIL** — ตรวจ URL, email, token ใหม่ด้วย `jlog setup`
+- **Kawari session หมด** — รัน `jlog sync` อีกครั้ง แล้วล็อกอินในหน้าต่าง Chromium
+- **Playwright Chromium FAIL** — ติดตั้ง `jlog` ใหม่
+- **ช่วงวันที่ผิด** — ต้องใส่ `--from` `--to` คู่กัน รูปแบบ `YYYY-MM-DD` ภายในเดือนเดียวกัน
+- **Sync Conflict** — ข้อมูลใน Kawari เปลี่ยนหลังจาก sync ไปแล้ว แก้ที่ Kawari ให้ตรงกันก่อน
+- **Sync ไม่ครบทุกรายการ** — รัน `jlog sync` อีกครั้งด้วยช่วงวันที่เดิม ที่สำเร็จแล้วจะถูกข้าม
+- **Rollback ไม่เจอ worklog** — ถ้า entry ย้าย issue ให้ `--issue OLD-KEY`
