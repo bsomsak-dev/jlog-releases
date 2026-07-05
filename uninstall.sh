@@ -5,10 +5,10 @@ usage() {
   cat <<'EOF'
 Usage: uninstall.sh [--purge]
 
-Uninstall the global jlog npm package.
+Uninstall the global workctl npm package.
 
 Options:
-  --purge  Also remove jlog configuration and runtime data after confirmation
+  --purge  Also remove workctl configuration and runtime data after confirmation
   --help   Show this help
 EOF
 }
@@ -34,15 +34,15 @@ while [ "$#" -gt 0 ]; do
 done
 
 if [ "$(uname -s)" != "Darwin" ]; then
-  echo "jlog currently supports macOS only." >&2
+  echo "workctl currently supports macOS only." >&2
   exit 1
 fi
 
-CONFIG_DIR="$HOME/.config/jlog"
-DATA_DIR="$HOME/.local/share/jlog"
+CONFIG_DIR="$HOME/.config/workctl"
+DATA_DIR="$HOME/.local/share/workctl"
 
 if [ "$PURGE" = true ]; then
-  echo "This will uninstall jlog and permanently remove:"
+  echo "This will uninstall workctl and permanently remove:"
   echo "  $CONFIG_DIR"
   echo "  $DATA_DIR"
   echo "Playwright's shared browser cache will not be removed."
@@ -55,17 +55,17 @@ if [ "$PURGE" = true ]; then
   printf "Type yes to continue: " >&3
   IFS= read -r ANSWER <&3
   if [ "$ANSWER" != "yes" ]; then
-    echo "Cancelled; jlog and its data were not removed."
+    echo "Cancelled; workctl and its data were not removed."
     exit 0
   fi
 fi
 
-npm uninstall -g jlog
-echo "jlog uninstalled"
+npm uninstall -g workctl
+echo "workctl uninstalled"
 
 if [ "$PURGE" = true ]; then
   rm -rf "$CONFIG_DIR" "$DATA_DIR"
-  echo "jlog configuration and runtime data removed"
+  echo "workctl configuration and runtime data removed"
 else
   echo "Configuration and runtime data were kept:"
   echo "  $CONFIG_DIR"

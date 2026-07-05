@@ -1,4 +1,4 @@
-# jlog
+# workctl
 
 CLI สำหรับนำเวลาจาก Kawari ไปสร้าง Jira Worklog
 
@@ -12,14 +12,14 @@ npm --version
 ```
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/jlog-releases/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/workctl-releases/main/install.sh | sh
 ```
 
-ตัวติดตั้งดาวน์โหลด `jlog` และ Playwright Chromium จากนั้นเปิด setup wizard
+ตัวติดตั้งดาวน์โหลด `workctl` และ Playwright Chromium จากนั้นเปิด setup wizard
 ถ้าปิดก่อนตั้งค่าเสร็จ รันใหม่:
 
 ```sh
-jlog setup
+workctl jlog setup
 ```
 
 เตรียม 5 อย่าง:
@@ -30,7 +30,7 @@ jlog setup
 - **Kawari timesheet URL** — URL เต็มของหน้า timesheet
 - **Timezone** — `Asia/Bangkok`
 
-Configuration เก็บที่ `~/.config/jlog/config.json`
+Configuration เก็บที่ `~/.config/workctl/config.json`
 API token เก็บเป็น plain text — ใช้บนเครื่องส่วนตัวที่เชื่อถือได้เท่านั้น
 
 ## เริ่มใช้งาน
@@ -38,13 +38,13 @@ API token เก็บเป็น plain text — ใช้บนเครื่
 ### 1. ตรวจความพร้อม
 
 ```sh
-jlog doctor
+workctl jlog doctor
 ```
 
 ต้องเห็น `PASS` ทุกรายการ (config, Jira auth, Playwright Chromium)
 
 ```sh
-jlog config show
+workctl jlog config show
 ```
 
 ดู configuration ที่ใช้อยู่ (token ถูกซ่อน)
@@ -52,7 +52,7 @@ jlog config show
 ### 2. Sync (คำสั่งเดียว ครบทุกขั้นตอน)
 
 ```sh
-jlog sync
+workctl jlog sync
 ```
 
 `sync` เป็น guided command — ทำงานทั้งหมดในครั้งเดียว:
@@ -70,7 +70,7 @@ jlog sync
 หากส่ง `--from` และ `--to` จะข้ามหน้าถาม:
 
 ```sh
-jlog sync --from 2026-07-01 --to 2026-07-04
+workctl jlog sync --from 2026-07-01 --to 2026-07-04
 ```
 
 การรัน `sync` แบบ non-interactive โดยไม่ส่งวันที่ยังใช้เดือนปัจจุบันอัตโนมัติ
@@ -80,19 +80,19 @@ guided เดียวกัน รวมถึงตอนที่ต้อง
 Enter ส่วน `--help`, `--version` และการรันแบบ non-interactive ยังคงเป็น plain text
 
 รันซ้ำจะข้ามรายการที่สร้างสำเร็จแล้ว ไม่มี duplicate
-ถ้า Jira issue ไม่มีอยู่จริง `jlog` จะให้ใส่ key ที่ถูกต้อง (เฉพาะ batch นี้ ไม่เปลี่ยน Kawari)
+ถ้า Jira issue ไม่มีอยู่จริง `workctl jlog` จะให้ใส่ key ที่ถูกต้อง (เฉพาะ batch นี้ ไม่เปลี่ยน Kawari)
 
 ### คำสั่งอื่น ๆ
 
 ```sh
-jlog preview                              # ดู preview อย่างเดียว (ไม่อนุมัติ ไม่เขียน)
-jlog verify  --from 2026-07-01 --to 2026-07-04   # ตรวจผลทีหลัง
+workctl jlog preview                              # ดู preview อย่างเดียว (ไม่อนุมัติ ไม่เขียน)
+workctl jlog verify  --from 2026-07-01 --to 2026-07-04   # ตรวจผลทีหลัง
 
-jlog rollback --from 2026-07-01 --to 2026-07-04 --dry-run   # ดูก่อนลบ
-jlog rollback --from 2026-07-01 --to 2026-07-04             # ลบ worklog จริง
+workctl jlog rollback --from 2026-07-01 --to 2026-07-04 --dry-run   # ดูก่อนลบ
+workctl jlog rollback --from 2026-07-01 --to 2026-07-04             # ลบ worklog จริง
 ```
 
-ถ้ารัน `jlog rollback` หรือ `jlog rollback --dry-run` โดยไม่ส่งวันที่ ระบบจะถาม
+ถ้ารัน `workctl jlog rollback` หรือ `workctl jlog rollback --dry-run` โดยไม่ส่งวันที่ ระบบจะถาม
 ช่วงวันที่แบบเดียวกับ `sync` การส่ง `--from` และ `--to` จะข้ามหน้าถาม
 
 Rollback ลบเฉพาะ worklog ที่ `jlog` สร้างไว้ และ restore เวลาเป็น Jira Remaining Estimate
@@ -101,23 +101,23 @@ Rollback ลบเฉพาะ worklog ที่ `jlog` สร้างไว้
 ## คำสั่งทั้งหมด
 
 ```
-jlog setup
-jlog config show
-jlog doctor
-jlog sync     [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
-jlog preview  [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
-jlog verify   [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
-jlog rollback [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--issue KEY] [--dry-run]
-jlog update
-jlog --help
+workctl jlog setup
+workctl jlog config show
+workctl jlog doctor
+workctl jlog sync     [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
+workctl jlog preview  [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
+workctl jlog verify   [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
+workctl jlog rollback [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--issue KEY] [--dry-run]
+workctl jlog update
+workctl --help
 ```
 
-เพิ่ม `--export csv` หรือ `--export json` เพื่อบันทึกไฟล์ไว้ที่ `~/.local/share/jlog/audit-exports/`
+เพิ่ม `--export csv` หรือ `--export json` เพื่อบันทึกไฟล์ไว้ที่ `~/.local/share/workctl/jlog/audit-exports/`
 
 ## อัปเดต
 
 ```sh
-jlog update
+workctl jlog update
 ```
 
 ตรวจสอบ release ล่าสุดจาก GitHub ยืนยัน checksum แล้วพิมพ์ `yes` เพื่อติดตั้ง
@@ -125,22 +125,22 @@ jlog update
 ## ถอนการติดตั้ง
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/jlog-releases/main/uninstall.sh | sh
+curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/workctl-releases/main/uninstall.sh | sh
 ```
 
 ลบทั้งหมดรวม config, token, state:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/jlog-releases/main/uninstall.sh | sh -s -- --purge
+curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/workctl-releases/main/uninstall.sh | sh -s -- --purge
 ```
 
 ## ปัญหาที่พบบ่อย
 
-- **Setup ไม่สำเร็จ** — `jlog setup` → `jlog doctor`
-- **Jira auth FAIL** — ตรวจ URL, email, token ใหม่ด้วย `jlog setup`
-- **Kawari session หมด** — รัน `jlog sync` อีกครั้ง แล้วล็อกอินในหน้าต่าง Chromium
-- **Playwright Chromium FAIL** — ติดตั้ง `jlog` ใหม่
+- **Setup ไม่สำเร็จ** — `workctl jlog setup` → `workctl jlog doctor`
+- **Jira auth FAIL** — ตรวจ URL, email, token ใหม่ด้วย `workctl jlog setup`
+- **Kawari session หมด** — รัน `workctl jlog sync` อีกครั้ง แล้วล็อกอินในหน้าต่าง Chromium
+- **Playwright Chromium FAIL** — ติดตั้ง `workctl` ใหม่
 - **ช่วงวันที่ผิด** — ต้องใส่ `--from` `--to` คู่กัน รูปแบบ `YYYY-MM-DD` ภายในเดือนเดียวกัน
 - **Sync Conflict** — ข้อมูลใน Kawari เปลี่ยนหลังจาก sync ไปแล้ว แก้ที่ Kawari ให้ตรงกันก่อน
-- **Sync ไม่ครบทุกรายการ** — รัน `jlog sync` อีกครั้งด้วยช่วงวันที่เดิม ที่สำเร็จแล้วจะถูกข้าม
+- **Sync ไม่ครบทุกรายการ** — รัน `workctl jlog sync` อีกครั้งด้วยช่วงวันที่เดิม ที่สำเร็จแล้วจะถูกข้าม
 - **Rollback ไม่เจอ worklog** — ถ้า entry ย้าย issue ให้ `--issue OLD-KEY`
