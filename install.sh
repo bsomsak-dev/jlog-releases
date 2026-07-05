@@ -65,24 +65,19 @@ fi
 echo "workctl installed"
 node "$WORKCTL_BIN" --version
 
-# A valid stored config can be checked without a terminal. If setup is needed,
-# reconnect the wizard to the user's terminal because this script is normally
-# executed with its standard input connected to curl.
-if node "$WORKCTL_BIN" jlog setup --if-needed >/dev/null 2>&1; then
-  echo "workctl installed and configured"
+# The install script normally receives stdin from curl, so reconnect the
+# onboarding hub to the user's terminal. Installation remains successful when
+# onboarding is unavailable, cancelled, or incomplete.
+if ! exec 3<>/dev/tty; then
+  echo "workctl installed. Onboarding requires an interactive terminal." >&2
+  echo "Run: workctl setup" >&2
   exit 0
 fi
 
-if ! exec 3<>/dev/tty; then
-  echo "workctl was installed, but configuration requires an interactive terminal." >&2
-  echo "Run: workctl jlog setup" >&2
-  exit 1
+if ! node "$WORKCTL_BIN" setup <&3 >&3 2>&3; then
+  echo "workctl installed, but onboarding was not completed." >&2
+  echo "Run: workctl setup" >&2
+  exit 0
 fi
 
-if ! node "$WORKCTL_BIN" jlog setup --if-needed <&3 >&3; then
-  echo "workctl was installed, but configuration was not completed." >&2
-  echo "Run: workctl jlog setup" >&2
-  exit 1
-fi
-
-echo "workctl installed and configured"
+echo "workctl installation complete"

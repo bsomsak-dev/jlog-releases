@@ -19,7 +19,7 @@ curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/workctl-releases/main/i
 ถ้าปิดก่อนตั้งค่าเสร็จ รันใหม่:
 
 ```sh
-workctl jlog setup
+workctl setup
 ```
 
 เตรียม 5 อย่าง:
@@ -101,7 +101,8 @@ Rollback ลบเฉพาะ worklog ที่ `jlog` สร้างไว้
 ## คำสั่งทั้งหมด
 
 ```
-workctl jlog setup
+workctl setup
+workctl jlog configure
 workctl jlog config show
 workctl jlog doctor
 workctl jlog sync     [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--export csv|json]
@@ -136,8 +137,8 @@ curl -fsSL https://raw.githubusercontent.com/bsomsak-dev/workctl-releases/main/u
 
 ## ปัญหาที่พบบ่อย
 
-- **Setup ไม่สำเร็จ** — `workctl jlog setup` → `workctl jlog doctor`
-- **Jira auth FAIL** — ตรวจ URL, email, token ใหม่ด้วย `workctl jlog setup`
+- **Setup ไม่สำเร็จ** — `workctl setup` แล้วเลือก capability ที่ต้องการทำซ้ำ
+- **Jira auth FAIL** — ตรวจ URL, email, token ใหม่ด้วย `workctl jlog configure`
 - **Kawari session หมด** — รัน `workctl jlog sync` อีกครั้ง แล้วล็อกอินในหน้าต่าง Chromium
 - **Playwright Chromium FAIL** — ติดตั้ง `workctl` ใหม่
 - **ช่วงวันที่ผิด** — ต้องใส่ `--from` `--to` คู่กัน รูปแบบ `YYYY-MM-DD` ภายในเดือนเดียวกัน
